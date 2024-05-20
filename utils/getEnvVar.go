@@ -15,18 +15,18 @@ func loadEnv() {
 	}
 }
 
-func GetEnvironmentVariable(key string, defaultValue string) (string, error) {
+func GetEnvironmentVariable(key string, defaultValue string) string {
 	loadEnv()
 
-	value, error := os.LookupEnv(key)
+	value, exists := os.LookupEnv(key)
 
-	if error {
-		return value, fmt.Errorf("environment variable %s not found", key)
+	if !exists {
+		panic(fmt.Sprintf("environment variable %s not found", key))
 	}
 
 	if value != "" {
-		return value, nil
+		return value
 	}
 
-	return defaultValue, nil
+	return defaultValue
 }
