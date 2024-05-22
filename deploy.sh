@@ -7,7 +7,7 @@ new_container_name="couple-bot-service-$(date +%s)"
 echo "New container name: $new_container_name"
 
 sudo docker run --rm -d --name "$new_container_name" \
-    -e TELEGRAM_BOT_TOKEN="$1" \
+    -e TELEGRAM_BOT_TOKEN="$2" \
     gcr.io/linen-shape-420522/couple-bot-service:latest
 
 # Check if the new container is up and running
