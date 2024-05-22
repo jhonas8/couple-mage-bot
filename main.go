@@ -1,6 +1,7 @@
 package main
 
 import (
+	"couplebot/clients"
 	"couplebot/utils"
 	"log"
 
@@ -28,10 +29,12 @@ func main() {
 		if update.Message != nil {
 			botUsername := bot.Self.UserName
 			if update.Message.IsCommand() || update.Message.Entities != nil && utils.ContainsMention(update.Message.Text, botUsername) {
-				log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 				msg.ReplyToMessageID = update.Message.MessageID
+
+				clients.GenerateResponseForPrompt(&msg)
+
+				utils.AddsUserMention(&msg, update.Message.From.UserName)
 
 				msgSent, errorSending := bot.Send(msg)
 
