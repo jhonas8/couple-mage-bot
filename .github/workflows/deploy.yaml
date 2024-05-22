@@ -1,0 +1,50 @@
+name: Deploy to Google Compute Engine
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Google Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCLOUD_SERVICE_KEY }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: gcr.io/linen-shape-420522/couple-bot-service:latest
+          file: ./Dockerfile
+          context: .
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: linen-shape-420522
+          service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
+          export_default_credentials: true
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: List SSH keys
+        run: ssh-add -L
+
+      - name: Deploy to VM
+        run: |
+          gcloud compute ssh --zone "us-central1-a" "sheep-mage-vm" --project "linen-shape-420522" --command="bash /home/deploy_couple.sh ${{ secrets.TELEGRAM_BOT_TOKEN }}"
