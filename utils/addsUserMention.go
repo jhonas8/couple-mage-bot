@@ -7,5 +7,5 @@ import (
 )
 
 func AddsUserMention(msg *tgbotapi.MessageConfig, targetUserMention string) {
-	msg.Text = fmt.Sprintf("@%s %s", targetUserMention, msg.Text)
+	msg.Text = fmt.Sprintf("@%s %s, \n", targetUserMention, msg.Text)
 }

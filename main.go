@@ -2,6 +2,7 @@ package main
 
 import (
 	"couplebot/clients"
+	"couplebot/commands"
 	"couplebot/utils"
 	"log"
 
@@ -29,10 +30,20 @@ func main() {
 		if update.Message != nil {
 			botUsername := bot.Self.UserName
 			if update.Message.IsCommand() || update.Message.Entities != nil && utils.ContainsMention(update.Message.Text, botUsername) {
+				clients.ImediatellyMentionUser(bot, update)
+
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 				msg.ReplyToMessageID = update.Message.MessageID
 
-				clients.GenerateResponseForPrompt(&msg)
+				command, isCommand := utils.ExtractCommand(update.Message.Text)
+
+				if isCommand {
+					switch command {
+					case "/image":
+						commands.ProcessImageGeneration(update.Message.Text, bot, update.Message.Chat.ID)
+
+					}
+				}
 
 				utils.AddsUserMention(&msg, update.Message.From.UserName)
 

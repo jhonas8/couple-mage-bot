@@ -24,6 +24,14 @@ FROM debian:buster-slim
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    build-essential
+
+RUN apt-get update -y
+RUN apt-get install -y libx11-dev
+
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main .
 
