@@ -37,15 +37,13 @@ func processDirectMentions(msg *tgbotapi.MessageConfig, bot *tgbotapi.BotAPI) {
 }
 
 func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	if update.Message == nil {
+	isNotAValidInstruction := update.Message.Entities == nil || !update.Message.IsCommand() && !utils.ContainsMention(update.Message.Text, bot.Self.UserName)
+
+	if update.Message == nil || isNotAValidInstruction {
 		return
 	}
 
-	if update.Message.Entities == nil || !update.Message.IsCommand() && !utils.ContainsMention(update.Message.Text, bot.Self.UserName) {
-		return
-	}
-
-	actions.ImediatellyReplyUser(bot, *update)
+	immediatelyMsg, _ := actions.ImmediatelyReplyUser(bot, *update)
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 	msg.ReplyToMessageID = update.Message.MessageID
@@ -58,6 +56,7 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	utils.AddsUserMention(&msg, update.Message.From.UserName)
 
+	actions.DeleteMessage(immediatelyMsg, bot, update.Message.Chat.ID)
 	msgSent, errorSending := bot.Send(msg)
 
 	if errorSending != nil {
