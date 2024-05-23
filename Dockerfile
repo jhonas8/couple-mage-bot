@@ -1,5 +1,6 @@
-# Use the official Go image as the base image
-FROM golang:1.19-alpine
+# Use the official Golang image to create a build artifact.
+# This image is based on Debian, so we use apt-get to install packages.
+FROM golang:1.22 as builder
 
 # Set the working directory inside the container
 WORKDIR /goapp
