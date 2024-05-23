@@ -75,6 +75,6 @@ func serveHealthCheck() {
 }
 
 func main() {
-	botExecution()
+	go botExecution()
 	serveHealthCheck()
 }
