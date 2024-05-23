@@ -21,4 +21,4 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
-        gcloud run deploy couple-telegram-bot --source . --platform managed --region us-central1 --allow-unauthenticated --no-cpu-throttling --set-secrets=TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest
+          gcloud run deploy couple-telegram-bot --source . --platform managed --region us-central1 --allow-unauthenticated --no-cpu-throttling --set-secrets=TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest
