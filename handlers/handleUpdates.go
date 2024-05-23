@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"couplebot/actions"
+	"couplebot/commands"
 	"couplebot/utils"
 	"fmt"
 	"log"
@@ -14,8 +15,8 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update) {
 
 	if command, isKnown := utils.ExtractCommand(update.Message.Text); isKnown {
 		switch command {
-		case "":
-			log.Print("")
+		case "/imagem":
+			commands.ProcessImageGeneration(msg.Text, &(msg.Text))
 
 		default:
 			msgText = fmt.Sprintf("Ainda não sei como fazer %s. Me desculpe 🥹", command)
