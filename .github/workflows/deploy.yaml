@@ -29,4 +29,4 @@ jobs:
 
       - name: Deploy to VM
         run: |
-          gcloud compute ssh --zone "us-central1-a" "sheep-mage-vm" --project "linen-shape-420522" --command="bash /home/deploy_couple.sh ${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          gcloud compute ssh --zone "us-central1-a" "sheep-mage-vm" --project "linen-shape-420522" --command="sudo bash /home/deploy_couple.sh ${{ secrets.TELEGRAM_BOT_TOKEN }}"

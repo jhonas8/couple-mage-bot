@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN go build -o main .
+RUN CGO_ENABLED=0 go build -o main .
 
 # Use a Docker multi-stage build to create a lean production image.
 # Start with a smaller base image
@@ -23,14 +23,6 @@ FROM debian:buster-slim
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
-
-RUN apt-get update -y && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    build-essential
-
-RUN apt-get update -y
-RUN apt-get install -y libx11-dev
 
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main .
