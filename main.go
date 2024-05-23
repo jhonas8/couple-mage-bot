@@ -1,8 +1,8 @@
 package main
 
 import (
-	"couplebot/clients"
-	"couplebot/commands"
+	"couplebot/handlers"
+	"couplebot/telegram"
 	"couplebot/utils"
 	"log"
 	"net/http"
@@ -12,55 +12,18 @@ import (
 
 func botExecution() {
 	bot, err := tgbotapi.NewBotAPI(utils.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", ""))
-
 	if err != nil {
-
-		log.Panic("Error creating bot: ", err)
+		log.Panic("Error Creating the bot: ", err)
 	}
 
-	bot.Debug = true
+	telegram.ConfigBot(bot)
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
-	u := tgbotapi.NewUpdate(0)
-
-	u.Timeout = 120
-
-	updates := bot.GetUpdatesChan(u)
+	updates := telegram.GetUpdatesChannel(bot)
 
 	for update := range updates {
-		if update.Message != nil {
-			botUsername := bot.Self.UserName
-			if update.Message.IsCommand() || update.Message.Entities != nil && utils.ContainsMention(update.Message.Text, botUsername) {
-				clients.ImediatellyMentionUser(bot, update)
-
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-				msg.ReplyToMessageID = update.Message.MessageID
-
-				command, isCommand := utils.ExtractCommand(update.Message.Text)
-
-				if isCommand {
-					switch command {
-					case "/image":
-						commands.ProcessImageGeneration(update.Message.Text, bot, update.Message.Chat.ID)
-
-					}
-				}
-
-				utils.AddsUserMention(&msg, update.Message.From.UserName)
-
-				msgSent, errorSending := bot.Send(msg)
-
-				if errorSending != nil {
-					log.Printf("\nError sending message: %s", errorSending)
-				} else {
-					log.Printf("\nMessage sent: %s", msgSent.Text)
-				}
-			} else {
-				log.Printf("\nThis message is not meant to be processed by the bot")
-			}
-		}
+		handlers.HandleUpdate(&update, bot)
 	}
+
 }
 
 func serveHealthCheck() {
