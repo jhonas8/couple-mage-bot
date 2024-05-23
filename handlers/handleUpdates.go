@@ -40,7 +40,7 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		return
 	}
 
-	if !update.Message.IsCommand() || update.Message.Entities == nil || !utils.ContainsMention(update.Message.Text, bot.Self.UserName) {
+	if update.Message.Entities == nil || !update.Message.IsCommand() && !utils.ContainsMention(update.Message.Text, bot.Self.UserName) {
 		return
 	}
 
