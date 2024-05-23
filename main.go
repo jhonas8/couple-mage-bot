@@ -14,7 +14,8 @@ func botExecution() {
 	bot, err := tgbotapi.NewBotAPI(utils.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", ""))
 
 	if err != nil {
-		log.Panic(err)
+
+		log.Panic("Error creating bot: ", err)
 	}
 
 	bot.Debug = true
@@ -23,7 +24,7 @@ func botExecution() {
 
 	u := tgbotapi.NewUpdate(0)
 
-	u.Timeout = 60
+	u.Timeout = 120
 
 	updates := bot.GetUpdatesChan(u)
 
@@ -75,6 +76,6 @@ func serveHealthCheck() {
 }
 
 func main() {
-	go botExecution()
-	serveHealthCheck()
+	go serveHealthCheck()
+	botExecution()
 }
