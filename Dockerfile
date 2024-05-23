@@ -1,32 +1,22 @@
-# Use the official Golang image to create a build artifact.
-# This image is based on Debian, so we use apt-get to install packages.
-FROM golang:1.22 as builder
+# Use the official Go image as the base image
+FROM golang:1.19-alpine
 
-# Set the Current Working Directory inside the container
-WORKDIR /app
+# Set the working directory inside the container
+WORKDIR /goapp
 
-# Copy go mod and sum files
+# Copy the Go module files
 COPY go.mod go.sum ./
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+# Download the dependencies
 RUN go mod download
 
-# Copy the source code into the container
+# Copy the rest of the application code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 go build -o main .
+# Build the Go application
+RUN go build -o main .
 
-# Use a Docker multi-stage build to create a lean production image.
-# Start with a smaller base image
-FROM debian:buster-slim
+EXPOSE 8080
 
-# Set the Current Working Directory inside the container
-WORKDIR /app
-
-# Copy the pre-built binary file from the previous stage
-COPY --from=builder /app/main .
-
-# Command to run the executable
+# Set the entry point command to run the built binary
 CMD ["./main"]
-
