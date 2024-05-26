@@ -10,13 +10,18 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update) {
+func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	var msgText string
 
 	if command, isKnown := utils.ExtractCommand(update.Message.Text); isKnown {
 		switch command {
 		case "/imagem":
-			commands.ProcessImageGeneration(msg.Text, &(msg.Text))
+			files := commands.ProcessImageGeneration(msg.Text, &(msg.Text), bot)
+
+			for _, file := range files {
+				sendable := tgbotapi.NewPhoto(update.Message.Chat.ID, file)
+				bot.Send(sendable)
+			}
 
 		default:
 			msgText = fmt.Sprintf("Ainda não sei como fazer %s. Me desculpe 🥹", command)
@@ -49,14 +54,19 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	msg.ReplyToMessageID = update.Message.MessageID
 
 	if update.Message.IsCommand() {
-		processComamnd(&msg, update)
+		processComamnd(&msg, update, bot)
 	} else if utils.ContainsMention(update.Message.Text, bot.Self.UserName) {
 		processDirectMentions(&msg, bot)
+	}
+
+	if msg.Text == "" {
+		return
 	}
 
 	utils.AddsUserMention(&msg, update.Message.From.UserName)
 
 	actions.DeleteMessage(immediatelyMsg, bot, update.Message.Chat.ID)
+
 	msgSent, errorSending := bot.Send(msg)
 
 	if errorSending != nil {
