@@ -14,9 +14,10 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 	var msgText string
 
 	if command, isKnown := utils.ExtractCommand(update.Message.Text); isKnown {
+		log.Printf("This is the command: %s", command)
 		switch command {
 		case "/imagem":
-			files := commands.ProcessImageGeneration(msg.Text, &(msg.Text), bot)
+			files := commands.ProcessImageGeneration(update.Message.Text, &msgText, bot)
 
 			for _, file := range files {
 				sendable := tgbotapi.NewPhoto(update.Message.Chat.ID, file)
