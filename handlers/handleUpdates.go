@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"couplebot/actions"
+	"couplebot/clients"
 	"couplebot/commands"
 	"couplebot/utils"
 	"fmt"
@@ -34,12 +35,14 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 	msg.Text = msgText
 }
 
-func processDirectMentions(msg *tgbotapi.MessageConfig, bot *tgbotapi.BotAPI) {
+func processDirectMentions(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if commands, err := bot.GetMyCommands(); err != nil {
 		msg.Text = fmt.Sprintf("Olá! Como posso te ajudar? Escolha um dos comandos existentes %s", commands)
 	}
 
-	msg.Text = "Olá! Não consigo responder a menções diretas ainda. Dê uma olhada nos meus comandos. 😄"
+	projectID := "linen-shape-420522"
+
+	clients.GenerateContentFromText(&msg.Text, projectID, "Como debuggar um código em golang?")
 }
 
 func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
@@ -57,7 +60,7 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	if update.Message.IsCommand() {
 		processComamnd(&msg, update, bot)
 	} else if utils.ContainsMention(update.Message.Text, bot.Self.UserName) {
-		processDirectMentions(&msg, bot)
+		processDirectMentions(&msg, update, bot)
 	}
 
 	if msg.Text == "" {
