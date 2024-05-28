@@ -41,6 +41,8 @@ func processDirectMentions(msg *tgbotapi.MessageConfig, update *tgbotapi.Update,
 
 	prompt := utils.RemovesMention(update.Message.Text, bot.Self.UserName)
 
+	prompt += "\n Se possível, formate sua resposta de forma adequada para ser enviada em mensagens de texto no telegram."
+
 	messages := []string{}
 
 	clients.GenerateContentFromText(&messages, projectID, prompt)
