@@ -44,6 +44,9 @@ func GenerateContentFromText(targetString *string, projectID string, promptText 
 	if err != nil {
 		return fmt.Errorf("error creating client: %w", err)
 	}
+
+	defer client.Close()
+
 	gemini := client.GenerativeModel(modelName)
 	prompt := genai.Text(promptText)
 

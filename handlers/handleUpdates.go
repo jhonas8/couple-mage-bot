@@ -36,9 +36,6 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 }
 
 func processDirectMentions(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	if commands, err := bot.GetMyCommands(); err != nil {
-		msg.Text = fmt.Sprintf("Olá! Como posso te ajudar? Escolha um dos comandos existentes %s", commands)
-	}
 
 	projectID := "linen-shape-420522"
 
