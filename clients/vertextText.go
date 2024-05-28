@@ -35,7 +35,7 @@ type GenerationResponse struct {
 	} `json:"UsageMetadata"`
 }
 
-func GenerateContentFromText(targetString *string, projectID string, promptText string) error {
+func GenerateContentFromText(targetStrings *[]string, projectID string, promptText string) error {
 	location := "us-central1"
 	modelName := "gemini-1.5-flash-001"
 
@@ -66,14 +66,12 @@ func GenerateContentFromText(targetString *string, projectID string, promptText 
 	jsonErrr := json.Unmarshal(rb, &result)
 
 	if jsonErrr != nil {
-		*targetString = "Ocorreu um erro gerando a resposta"
+		*targetStrings = []string{"Ocorreu um erro gerando a resposta"}
 		return jsonErrr
 	}
 
 	for _, c := range result.Candidates {
-		for _, p := range c.Content.Parts {
-			*targetString += p
-		}
+		*targetStrings = append(*targetStrings, c.Content.Parts...)
 	}
 
 	return nil

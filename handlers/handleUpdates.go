@@ -41,7 +41,16 @@ func processDirectMentions(msg *tgbotapi.MessageConfig, update *tgbotapi.Update,
 
 	prompt := utils.RemovesMention(update.Message.Text, bot.Self.UserName)
 
-	clients.GenerateContentFromText(&msg.Text, projectID, prompt)
+	messages := []string{}
+
+	clients.GenerateContentFromText(&messages, projectID, prompt)
+
+	for _, message := range messages {
+		m := tgbotapi.NewMessage(update.Message.Chat.ID, message)
+		bot.Send(m)
+	}
+
+	msg.Text = "\n\n Isso é tudo que eu sei sobre! 🤓"
 }
 
 func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
