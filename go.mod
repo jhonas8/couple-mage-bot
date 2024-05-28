@@ -5,6 +5,7 @@ go 1.22.1
 require (
 	cloud.google.com/go v0.113.0 // indirect
 	cloud.google.com/go/ai v0.5.0 // indirect
+	cloud.google.com/go/aiplatform v1.67.0 // indirect
 	cloud.google.com/go/auth v0.4.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
@@ -12,6 +13,7 @@ require (
 	cloud.google.com/go/iam v1.1.8 // indirect
 	cloud.google.com/go/longrunning v0.5.7 // indirect
 	cloud.google.com/go/storage v1.41.0 // indirect
+	cloud.google.com/go/vertexai v0.10.0 // indirect
 	firebase.google.com/go v3.13.0+incompatible // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect

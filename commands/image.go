@@ -105,7 +105,7 @@ func httpRequestMidJourney(prompt string) ([]string, error) {
 		"photoReal":         true,
 		"photoRealStrength": 0.5,
 		"num_images":        1,
-		"presetStyle":       "CINEMATIC",
+		"presetStyle":       "DYNAMIC",
 	})
 
 	if err != nil {
