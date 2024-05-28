@@ -42,7 +42,9 @@ func processDirectMentions(msg *tgbotapi.MessageConfig, update *tgbotapi.Update,
 
 	projectID := "linen-shape-420522"
 
-	clients.GenerateContentFromText(&msg.Text, projectID, "Como debuggar um código em golang?")
+	prompt := utils.RemovesMention(update.Message.Text, bot.Self.UserName)
+
+	clients.GenerateContentFromText(&msg.Text, projectID, prompt)
 }
 
 func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
