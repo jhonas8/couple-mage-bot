@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -65,7 +64,7 @@ type GenerationResponse struct {
 
 func extractPrompt(text *string) {
 	// Remove the "/imagem" command from the incoming text
-	*text = strings.TrimSpace(strings.Replace(*text, "/imagem", "", 1))
+	utils.RemoveCommand(text)
 }
 
 func ProcessImageGeneration(text string, msgText *string, bot *tgbotapi.BotAPI) []tgbotapi.FileURL {

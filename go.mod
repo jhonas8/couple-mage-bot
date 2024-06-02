@@ -15,10 +15,13 @@ require (
 	cloud.google.com/go/storage v1.41.0 // indirect
 	cloud.google.com/go/vertexai v0.10.0 // indirect
 	firebase.google.com/go v3.13.0+incompatible // indirect
+	firebase.google.com/go/v4 v4.14.0 // indirect
+	github.com/MicahParks/keyfunc v1.9.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/generative-ai-go v0.12.0 // indirect
@@ -42,6 +45,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/api v0.181.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
+	google.golang.org/appengine/v2 v2.0.2 // indirect
 	google.golang.org/genproto v0.0.0-20240520151616-dc85e6b867a5 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240520151616-dc85e6b867a5 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240520151616-dc85e6b867a5 // indirect

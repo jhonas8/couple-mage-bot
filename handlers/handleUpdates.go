@@ -25,6 +25,12 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 				bot.Send(sendable)
 			}
 
+		case "/novo_filme":
+			commands.AddNewMovie(update.Message.Text, &msgText, bot)
+
+		case "/filmes":
+			commands.ShowAllMovies(&msgText)
+
 		default:
 			msgText = fmt.Sprintf("Ainda não sei como fazer %s. Me desculpe 🥹", command)
 		}
