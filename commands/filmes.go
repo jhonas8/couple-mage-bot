@@ -9,7 +9,9 @@ func ShowAllMovies(msgText *string) string {
 	movies := clients.GetAllMovies()
 
 	if len(movies) <= 0 {
-		return "Não consegui achar nenhum filme em minha base de dados.\n Talvez você não tenha mais filmes salvos."
+		msg := "Não consegui achar nenhum filme em minha base de dados.\n Talvez você não tenha mais filmes salvos."
+		*msgText = msg
+		return msg
 	}
 
 	allMovies := ""
