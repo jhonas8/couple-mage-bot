@@ -16,15 +16,21 @@ func getMovieProperties(s string) *clients.Movie {
 
 	name := words[0]
 
+	if strings.HasPrefix(name, "/") {
+		name = words[1]
+	}
+
 	m.Name = name
 
 	return &m
 }
 
 func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI) {
-	utils.RemoveCommand(&text)
+	localText := text
 
-	m := getMovieProperties(text)
+	utils.RemoveCommand(&localText)
+
+	m := getMovieProperties(localText)
 
 	clients.WriteNewMovie(*m)
 
