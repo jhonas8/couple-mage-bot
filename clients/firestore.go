@@ -86,6 +86,7 @@ func readData(collection string) ([]map[string]interface{}, error) {
 			break
 		}
 		if err != nil {
+			log.Printf("Error reading the data from collection {%s}: %s", collection, err.Error())
 			return nil, err
 		}
 		results = append(results, doc.Data())
