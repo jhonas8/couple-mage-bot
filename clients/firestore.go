@@ -18,9 +18,9 @@ func WriteNewMovie(m Movie) bool {
 		"name": m.Name,
 	}
 
-	writeData(data, "movies")
+	_, err := writeData(data, "movies")
 
-	return true
+	return err == nil
 }
 
 func GetAllMovies() []Movie {
