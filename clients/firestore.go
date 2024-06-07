@@ -46,7 +46,7 @@ func GetAllMovies() []Movie {
 func getClient() (*firestore.Client, *context.Context) {
 	// Use the application default credentials
 	ctx := context.Background()
-	conf := &firebase.Config{ProjectID: "couple-mage"}
+	conf := &firebase.Config{ProjectID: "linen-shape-420522"}
 	app, err := firebase.NewApp(ctx, conf)
 	if err != nil {
 		log.Fatalln(err)
