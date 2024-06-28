@@ -46,10 +46,14 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			}
 
 		case command == "/novo_filme" || strings.HasPrefix(command, "movie_"):
-			localText := update.Message.Text
+			var localText string
+
 			if update.CallbackQuery != nil {
 				localText = update.CallbackQuery.Data
+			} else if update.Message != nil {
+				localText = update.Message.Text
 			}
+
 			utils.RemoveCommand(&localText)
 			m := commands.GetMovieProperties(localText)
 
