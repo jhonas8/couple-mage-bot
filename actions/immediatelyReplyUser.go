@@ -6,10 +6,10 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func ImmediatelyReplyUser(bot *tgbotapi.BotAPI, update tgbotapi.Update) (*tgbotapi.Message, error) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Estou pensando 🧠...")
+func ImmediatelyReplyUser(bot *tgbotapi.BotAPI, chatID int64, messageID int) (*tgbotapi.Message, error) {
+	msg := tgbotapi.NewMessage(chatID, "Estou pensando 🧠...")
 
-	msg.ReplyToMessageID = update.Message.MessageID
+	msg.ReplyToMessageID = messageID
 
 	msgSent, err := bot.Send(msg)
 

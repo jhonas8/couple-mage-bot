@@ -122,7 +122,6 @@ func processDirectMentions(msg *tgbotapi.MessageConfig, update *tgbotapi.Update,
 }
 
 func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	log.Printf("Update: %+v", update)
 	if update.Message == nil && update.CallbackQuery == nil {
 		return
 	}
@@ -133,11 +132,14 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		chatID = update.Message.Chat.ID
 		messageID = update.Message.MessageID
 	} else if update.CallbackQuery != nil {
+		log.Printf("CallbackQuery: %+v", update.CallbackQuery)
 		chatID = update.CallbackQuery.Message.Chat.ID
 		messageID = update.CallbackQuery.Message.MessageID
+		log.Printf("MessageID: %d", messageID)
+		log.Printf("ChatID: %d", chatID)
 	}
 
-	immediatelyMsg, _ := actions.ImmediatelyReplyUser(bot, *update)
+	immediatelyMsg, _ := actions.ImmediatelyReplyUser(bot, chatID, messageID)
 
 	msg := tgbotapi.NewMessage(chatID, "")
 	msg.ReplyToMessageID = messageID
