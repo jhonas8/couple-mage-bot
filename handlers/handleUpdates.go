@@ -54,42 +54,32 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 				localText = update.Message.Text
 			}
 
+			choice := localText
+			if choice == "movie_none" {
+				commands.PromptForManualEntry(bot, chatID)
+				return
+			}
+
 			utils.RemoveCommand(&localText)
 			m := commands.GetMovieProperties(localText)
 
-			OMBdMoviesAvailable, err := clients.SearchMoviesByTitle(m.Name)
+			OMBdMoviesAvailable, err := clients.SearchMoviesByTitle(m.Title)
 
 			if err != nil {
 				msgText = "Ocorreu um erro ao buscar o filme: " + err.Error()
 			}
-			if strings.HasPrefix(localText, "movie_") {
-				choice := localText
-				if choice == "movie_none" {
-					commands.PromptForManualEntry(bot, chatID)
-					return // Exit early as we're handling this case separately
-				}
-
-				if strings.HasPrefix(choice, "movie_") {
-					index, _ := strconv.Atoi(strings.TrimPrefix(choice, "movie_"))
-					if index >= 0 && index < len(OMBdMoviesAvailable) {
-						selectedMovie := OMBdMoviesAvailable[index]
-						err := clients.WriteNewMovie(clients.Movie{Name: selectedMovie.Title})
-						if err != nil {
-							msgText = "Ocorreu um erro ao adicionar o filme ao banco de dados: " + err.Error()
-						} else {
-							// Delete previous messages
-							// Assuming you have stored the message IDs in a global variable or database
-							// For example: sentMessageIDs := globalMessageStore[update.Message.Chat.ID]
-							// for _, msgID := range sentMessageIDs {
-							// 	deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, msgID)
-							// 	bot.Send(deleteMsg)
-							// }
-
-							// Send confirmation message
-							msgText = fmt.Sprintf("Filme '%s' salvo com sucesso.", selectedMovie.Title)
-						}
+			if strings.HasPrefix(choice, "movie_") {
+				index, _ := strconv.Atoi(strings.TrimPrefix(choice, "movie_"))
+				if index >= 0 && index < len(OMBdMoviesAvailable) {
+					selectedMovie := OMBdMoviesAvailable[index]
+					err := clients.WriteNewMovie(selectedMovie)
+					if err != nil {
+						msgText = "Ocorreu um erro ao adicionar o filme ao banco de dados: " + err.Error()
+					} else {
+						msgText = fmt.Sprintf("Filme '%s' salvo com sucesso.", selectedMovie.Title)
 					}
 				}
+
 			} else {
 				commands.AddNewMovie(localText, &msgText, bot, chatID, OMBdMoviesAvailable)
 			}

@@ -8,23 +8,23 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func GetMovieProperties(s string) *clients.Movie {
-	var m clients.Movie
+func GetMovieProperties(s string) *clients.OMDbMovie {
+	var m clients.OMDbMovie
 
 	// Find the text between double quotes
 	start := strings.Index(s, "\"")
 	end := strings.LastIndex(s, "\"")
 
 	if start != -1 && end != -1 && start < end {
-		m.Name = s[start+1 : end]
+		m.Title = s[start+1 : end]
 	} else {
 		// Fallback to the original logic if quotes are not found
 		words := strings.Fields(s)
 		if len(words) > 0 {
 			if strings.HasPrefix(words[0], "/") && len(words) > 1 {
-				m.Name = words[1]
+				m.Title = words[1]
 			} else {
-				m.Name = words[0]
+				m.Title = words[0]
 			}
 		}
 	}

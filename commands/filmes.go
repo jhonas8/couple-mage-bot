@@ -19,7 +19,7 @@ func ShowAllMovies(msgText *string) string {
 	allMovies := ""
 
 	for i, m := range movies {
-		allMovies += fmt.Sprintf("%d. %s\n", i+1, m.Name)
+		allMovies += fmt.Sprintf("%d. %s\n", i+1, m.Title)
 	}
 
 	msg := "Você tem esses filmes salvos: \n" + allMovies

@@ -9,13 +9,13 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-type Movie struct {
-	Name string
-}
-
-func WriteNewMovie(m Movie) error {
+func WriteNewMovie(m OMDbMovie) error {
 	data := map[string]interface{}{
-		"name": m.Name,
+		"title":  m.Title,
+		"year":   m.Year,
+		"imdbID": m.ImdbID,
+		"type":   m.Type,
+		"poster": m.Poster,
 	}
 
 	_, err := writeData(data, "movies")
@@ -23,18 +23,22 @@ func WriteNewMovie(m Movie) error {
 	return err
 }
 
-func GetAllMovies() []Movie {
+func GetAllMovies() []OMDbMovie {
 	results, err := readData("movies")
 
 	if err != nil {
 		return nil
 	}
 
-	var movies []Movie
+	var movies []OMDbMovie
 
 	for _, r := range results {
-		m := Movie{
-			Name: r["name"].(string),
+		m := OMDbMovie{
+			Title:  r["title"].(string),
+			Year:   r["year"].(string),
+			ImdbID: r["imdbID"].(string),
+			Type:   r["type"].(string),
+			Poster: r["poster"].(string),
 		}
 
 		movies = append(movies, m)
