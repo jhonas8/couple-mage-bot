@@ -39,6 +39,11 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			}
 			if strings.HasPrefix(update.Message.Text, "/novo_filme movie_") {
 				choice := strings.TrimPrefix(update.Message.Text, "/novo_filme ")
+				if choice == "movie_none" {
+					commands.PromptForManualEntry(bot, update.Message.Chat.ID)
+					return // Exit early as we're handling this case separately
+				}
+
 				if strings.HasPrefix(choice, "movie_") {
 					index, _ := strconv.Atoi(strings.TrimPrefix(choice, "movie_"))
 					if index >= 0 && index < len(OMBdMoviesAvailable) {
@@ -49,9 +54,6 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 						} else {
 							msgText = fmt.Sprintf("Filme '%s' adicionado à base de dados.", selectedMovie.Title)
 						}
-					} else if choice == "movie_none" {
-						commands.PromptForManualEntry(bot, update.Message.Chat.ID)
-						return // Exit early as we're handling this case separately
 					}
 				}
 			} else {

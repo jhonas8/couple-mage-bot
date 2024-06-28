@@ -34,15 +34,20 @@ func GetMovieProperties(s string) *clients.Movie {
 
 func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int64, OMBdMoviesAvailable []clients.OMDbMovie) {
 	if len(OMBdMoviesAvailable) > 0 {
-		// Create a formatted list of movies
-		movieList := "Filmes encontrados:\n\n"
+		// Send each movie as a separate message with an image
 		for i, movie := range OMBdMoviesAvailable {
-			movieList += fmt.Sprintf("%d. %s (%s)\n", i+1, movie.Title, movie.Year)
-			// Add poster URL if available
+			caption := fmt.Sprintf("%d. %s (%s)", i+1, movie.Title, movie.Year)
+
+			var msg tgbotapi.Chattable
 			if movie.Poster != "N/A" {
-				movieList += fmt.Sprintf("   %s\n", movie.Poster)
+				photoMsg := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(movie.Poster))
+				photoMsg.Caption = caption
+				msg = photoMsg
+			} else {
+				msg = tgbotapi.NewMessage(chatID, caption)
 			}
-			movieList += "\n"
+
+			bot.Send(msg)
 		}
 
 		// Create keyboard buttons
@@ -56,9 +61,9 @@ func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int6
 			tgbotapi.NewInlineKeyboardButtonData("Nenhum dos acima", "movie_none"),
 		})
 
-		msg := tgbotapi.NewMessage(chatID, movieList)
-		msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboard...)
-		bot.Send(msg)
+		selectionMsg := tgbotapi.NewMessage(chatID, "Por favor, selecione o filme correto:")
+		selectionMsg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboard...)
+		bot.Send(selectionMsg)
 
 		*msgText = "Por favor, selecione o filme correto ou escolha 'Nenhum dos acima'."
 	} else {
