@@ -32,10 +32,13 @@ func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI) {
 
 	m := getMovieProperties(localText)
 
-	if success := clients.WriteNewMovie(*m); success {
-		*msgText = fmt.Sprintf("Filme %s adicionado a base de dados", m.Name)
+	err := clients.WriteNewMovie(*m)
+
+	if err != nil {
+		*msgText = "Occoreu um erro ao adicionar o seu filme ao banco de dados: \n" + err.Error()
+		return
 	}
 
-	*msgText = "Occoreu um erro ao adicionar o seu filme ao banco de dados."
+	*msgText = fmt.Sprintf("Filme %s adicionado a base de dados", m.Name)
 
 }

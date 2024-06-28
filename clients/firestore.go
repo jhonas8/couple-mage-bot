@@ -13,14 +13,14 @@ type Movie struct {
 	Name string
 }
 
-func WriteNewMovie(m Movie) bool {
+func WriteNewMovie(m Movie) error {
 	data := map[string]interface{}{
 		"name": m.Name,
 	}
 
 	_, err := writeData(data, "movies")
 
-	return err == nil
+	return err
 }
 
 func GetAllMovies() []Movie {
@@ -46,7 +46,7 @@ func GetAllMovies() []Movie {
 func getClient() (*firestore.Client, *context.Context) {
 	// Use the application default credentials
 	ctx := context.Background()
-	conf := &firebase.Config{ProjectID: "linen-shape-420522", DatabaseURL: "https://couple-bot-db.firebaseio.com"}
+	conf := &firebase.Config{ProjectID: "linen-shape-420522"}
 	app, err := firebase.NewApp(ctx, conf)
 	if err != nil {
 		log.Fatalln(err)
