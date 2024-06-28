@@ -33,7 +33,6 @@ func GetMovieProperties(s string) *clients.Movie {
 }
 
 func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int64, OMBdMoviesAvailable []clients.OMDbMovie) {
-
 	if len(OMBdMoviesAvailable) > 0 {
 		// Create a formatted list of movies
 		movieList := "Filmes encontrados:\n\n"
