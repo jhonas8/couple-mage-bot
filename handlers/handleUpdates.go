@@ -16,12 +16,20 @@ import (
 func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	var msgText string
 
-	command, isKnown := utils.ExtractCommand(update.Message.Text)
-	if !isKnown {
-		// Check if it's a callback query
-		if update.CallbackQuery != nil {
-			command = update.CallbackQuery.Data
-			isKnown = true
+	if update == nil {
+		log.Println("Error: update is nil")
+		return
+	}
+
+	var command string
+	var isKnown bool
+
+	if update.Message != nil {
+		command, isKnown = utils.ExtractCommand(update.Message.Text)
+	} else if update.CallbackQuery != nil {
+		command = update.CallbackQuery.Data
+		isKnown = true
+		if bot != nil && update.CallbackQuery.Message != nil {
 			bot.Send(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Callback query received: "+command))
 		}
 	}
