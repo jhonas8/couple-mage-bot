@@ -23,15 +23,15 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 
 	var command string
 	var isKnown bool
+	var chatID int64
 
 	if update.Message != nil {
 		command, isKnown = utils.ExtractCommand(update.Message.Text)
+		chatID = update.Message.Chat.ID
 	} else if update.CallbackQuery != nil {
 		command = update.CallbackQuery.Data
 		isKnown = true
-		if bot != nil && update.CallbackQuery.Message != nil {
-			bot.Send(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Callback query received: "+command))
-		}
+		chatID = update.CallbackQuery.Message.Chat.ID
 	}
 
 	if isKnown {
@@ -41,7 +41,7 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			files := commands.ProcessImageGeneration(update.Message.Text, &msgText, bot)
 
 			for _, file := range files {
-				sendable := tgbotapi.NewPhoto(update.Message.Chat.ID, file)
+				sendable := tgbotapi.NewPhoto(chatID, file)
 				bot.Send(sendable)
 			}
 
@@ -61,7 +61,7 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			if strings.HasPrefix(localText, "movie_") {
 				choice := localText
 				if choice == "movie_none" {
-					commands.PromptForManualEntry(bot, update.Message.Chat.ID)
+					commands.PromptForManualEntry(bot, chatID)
 					return // Exit early as we're handling this case separately
 				}
 
@@ -87,10 +87,10 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 					}
 				}
 			} else {
-				commands.AddNewMovie(localText, &msgText, bot, update.Message.Chat.ID, OMBdMoviesAvailable)
+				commands.AddNewMovie(localText, &msgText, bot, chatID, OMBdMoviesAvailable)
 			}
 
-			sendable := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+			sendable := tgbotapi.NewMessage(chatID, msgText)
 			bot.Send(sendable)
 
 		case command == "/filmes":
