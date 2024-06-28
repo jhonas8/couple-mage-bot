@@ -22,6 +22,7 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 		if update.CallbackQuery != nil {
 			command = update.CallbackQuery.Data
 			isKnown = true
+			bot.Send(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Callback query received: "+command))
 		}
 	}
 
