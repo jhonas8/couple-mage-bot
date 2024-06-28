@@ -122,6 +122,7 @@ func processDirectMentions(msg *tgbotapi.MessageConfig, update *tgbotapi.Update,
 }
 
 func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	log.Printf("Update: %+v", update)
 	if update.Message == nil && update.CallbackQuery == nil {
 		return
 	}
@@ -140,9 +141,6 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	msg := tgbotapi.NewMessage(chatID, "")
 	msg.ReplyToMessageID = messageID
-
-	bot.Send(tgbotapi.NewMessage(chatID, "Callback query received: "+update.CallbackQuery.Data))
-	bot.Send(tgbotapi.NewMessage(chatID, "Message received: "+update.CallbackData()))
 
 	if update.Message != nil && update.Message.IsCommand() {
 		processComamnd(&msg, update, bot)
