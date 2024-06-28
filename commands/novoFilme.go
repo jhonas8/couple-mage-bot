@@ -12,15 +12,23 @@ import (
 func getMovieProperties(s string) *clients.Movie {
 	var m clients.Movie
 
-	words := strings.Split(s, " ")
+	// Find the text between double quotes
+	start := strings.Index(s, "\"")
+	end := strings.LastIndex(s, "\"")
 
-	name := words[0]
-
-	if strings.HasPrefix(name, "/") {
-		name = words[1]
+	if start != -1 && end != -1 && start < end {
+		m.Name = s[start+1 : end]
+	} else {
+		// Fallback to the original logic if quotes are not found
+		words := strings.Fields(s)
+		if len(words) > 0 {
+			if strings.HasPrefix(words[0], "/") && len(words) > 1 {
+				m.Name = words[1]
+			} else {
+				m.Name = words[0]
+			}
+		}
 	}
-
-	m.Name = name
 
 	return &m
 }
