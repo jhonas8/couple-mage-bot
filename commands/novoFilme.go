@@ -2,14 +2,13 @@ package commands
 
 import (
 	"couplebot/clients"
-	"couplebot/utils"
 	"fmt"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func getMovieProperties(s string) *clients.Movie {
+func GetMovieProperties(s string) *clients.Movie {
 	var m clients.Movie
 
 	// Find the text between double quotes
@@ -33,20 +32,37 @@ func getMovieProperties(s string) *clients.Movie {
 	return &m
 }
 
-func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI) {
-	localText := text
+func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int64, OMBdMoviesAvailable []clients.OMDbMovie) {
 
-	utils.RemoveCommand(&localText)
+	if len(OMBdMoviesAvailable) > 0 {
+		// Create a formatted list of movies
+		movieList := "Filmes encontrados:\n\n"
+		for i, movie := range OMBdMoviesAvailable {
+			movieList += fmt.Sprintf("%d. %s (%s)\n", i+1, movie.Title, movie.Year)
+			// Add poster URL if available
+			if movie.Poster != "N/A" {
+				movieList += fmt.Sprintf("   %s\n", movie.Poster)
+			}
+			movieList += "\n"
+		}
 
-	m := getMovieProperties(localText)
+		// Create keyboard buttons
+		var keyboard [][]tgbotapi.InlineKeyboardButton
+		for i := range OMBdMoviesAvailable {
+			keyboard = append(keyboard, []tgbotapi.InlineKeyboardButton{
+				tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("%d", i+1), fmt.Sprintf("movie_%d", i)),
+			})
+		}
+		keyboard = append(keyboard, []tgbotapi.InlineKeyboardButton{
+			tgbotapi.NewInlineKeyboardButtonData("Nenhum dos acima", "movie_none"),
+		})
 
-	err := clients.WriteNewMovie(*m)
+		msg := tgbotapi.NewMessage(chatID, movieList)
+		msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboard...)
+		bot.Send(msg)
 
-	if err != nil {
-		*msgText = "Occoreu um erro ao adicionar o seu filme ao banco de dados: \n" + err.Error()
-		return
+		*msgText = "Por favor, selecione o filme correto ou escolha 'Nenhum dos acima'."
+	} else {
+		PromptForManualEntry(bot, chatID)
 	}
-
-	*msgText = fmt.Sprintf("Filme %s adicionado a base de dados", m.Name)
-
 }

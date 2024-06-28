@@ -3,6 +3,8 @@ package commands
 import (
 	"couplebot/clients"
 	"fmt"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func ShowAllMovies(msgText *string) string {
@@ -25,4 +27,9 @@ func ShowAllMovies(msgText *string) string {
 	*msgText = msg
 
 	return msg
+}
+
+func PromptForManualEntry(bot *tgbotapi.BotAPI, chatID int64) {
+	msg := tgbotapi.NewMessage(chatID, "Nenhum filme encontrado. Por favor, digite o título completo do filme:")
+	bot.Send(msg)
 }

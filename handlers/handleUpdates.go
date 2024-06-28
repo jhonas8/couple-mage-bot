@@ -7,6 +7,8 @@ import (
 	"couplebot/utils"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -26,7 +28,35 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			}
 
 		case "/novo_filme":
-			commands.AddNewMovie(update.Message.Text, &msgText, bot)
+			localText := update.Message.Text
+			utils.RemoveCommand(&localText)
+			m := commands.GetMovieProperties(localText)
+
+			OMBdMoviesAvailable, err := clients.SearchMoviesByTitle(m.Name)
+
+			if err != nil {
+				msgText = "Ocorreu um erro ao buscar o filme: " + err.Error()
+			}
+			if strings.HasPrefix(update.Message.Text, "/novo_filme movie_") {
+				choice := strings.TrimPrefix(update.Message.Text, "/novo_filme ")
+				if strings.HasPrefix(choice, "movie_") {
+					index, _ := strconv.Atoi(strings.TrimPrefix(choice, "movie_"))
+					if index >= 0 && index < len(OMBdMoviesAvailable) {
+						selectedMovie := OMBdMoviesAvailable[index]
+						err := clients.WriteNewMovie(clients.Movie{Name: selectedMovie.Title})
+						if err != nil {
+							msgText = "Ocorreu um erro ao adicionar o filme ao banco de dados: " + err.Error()
+						} else {
+							msgText = fmt.Sprintf("Filme '%s' adicionado à base de dados.", selectedMovie.Title)
+						}
+					} else if choice == "movie_none" {
+						commands.PromptForManualEntry(bot, update.Message.Chat.ID)
+						return // Exit early as we're handling this case separately
+					}
+				}
+			} else {
+				commands.AddNewMovie(update.Message.Text, &msgText, bot, update.Message.Chat.ID, OMBdMoviesAvailable)
+			}
 
 			sendable := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 			bot.Send(sendable)
