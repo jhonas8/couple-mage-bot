@@ -34,6 +34,7 @@ func GetMovieProperties(s string) *clients.Movie {
 
 func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int64, OMBdMoviesAvailable []clients.OMDbMovie) {
 	if len(OMBdMoviesAvailable) > 0 {
+		var sentMessageIDs []int
 		// Send each movie as a separate message with an image
 		for i, movie := range OMBdMoviesAvailable {
 			caption := fmt.Sprintf("%d. %s (%s)", i+1, movie.Title, movie.Year)
@@ -47,7 +48,8 @@ func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int6
 				msg = tgbotapi.NewMessage(chatID, caption)
 			}
 
-			bot.Send(msg)
+			sentMsg, _ := bot.Send(msg)
+			sentMessageIDs = append(sentMessageIDs, sentMsg.MessageID)
 		}
 
 		// Create keyboard buttons
@@ -63,9 +65,11 @@ func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int6
 
 		selectionMsg := tgbotapi.NewMessage(chatID, "Por favor, selecione o filme correto:")
 		selectionMsg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(keyboard...)
-		bot.Send(selectionMsg)
+		sentSelectionMsg, _ := bot.Send(selectionMsg)
+		sentMessageIDs = append(sentMessageIDs, sentSelectionMsg.MessageID)
 
 		*msgText = "Por favor, selecione o filme correto ou escolha 'Nenhum dos acima'."
+
 	} else {
 		PromptForManualEntry(bot, chatID)
 	}

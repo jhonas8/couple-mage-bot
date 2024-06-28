@@ -16,10 +16,19 @@ import (
 func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	var msgText string
 
-	if command, isKnown := utils.ExtractCommand(update.Message.Text); isKnown {
+	command, isKnown := utils.ExtractCommand(update.Message.Text)
+	if !isKnown {
+		// Check if it's a callback query
+		if update.CallbackQuery != nil {
+			command = update.CallbackQuery.Data
+			isKnown = true
+		}
+	}
+
+	if isKnown {
 		log.Printf("This is the command: %s", command)
-		switch command {
-		case "/imagem":
+		switch {
+		case command == "/imagem":
 			files := commands.ProcessImageGeneration(update.Message.Text, &msgText, bot)
 
 			for _, file := range files {
@@ -27,8 +36,11 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 				bot.Send(sendable)
 			}
 
-		case "/novo_filme":
+		case command == "/novo_filme" || strings.HasPrefix(command, "movie_"):
 			localText := update.Message.Text
+			if update.CallbackQuery != nil {
+				localText = update.CallbackQuery.Data
+			}
 			utils.RemoveCommand(&localText)
 			m := commands.GetMovieProperties(localText)
 
@@ -37,8 +49,8 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			if err != nil {
 				msgText = "Ocorreu um erro ao buscar o filme: " + err.Error()
 			}
-			if strings.HasPrefix(update.Message.Text, "/novo_filme movie_") {
-				choice := strings.TrimPrefix(update.Message.Text, "/novo_filme ")
+			if strings.HasPrefix(localText, "movie_") {
+				choice := localText
 				if choice == "movie_none" {
 					commands.PromptForManualEntry(bot, update.Message.Chat.ID)
 					return // Exit early as we're handling this case separately
@@ -52,18 +64,27 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 						if err != nil {
 							msgText = "Ocorreu um erro ao adicionar o filme ao banco de dados: " + err.Error()
 						} else {
-							msgText = fmt.Sprintf("Filme '%s' adicionado à base de dados.", selectedMovie.Title)
+							// Delete previous messages
+							// Assuming you have stored the message IDs in a global variable or database
+							// For example: sentMessageIDs := globalMessageStore[update.Message.Chat.ID]
+							// for _, msgID := range sentMessageIDs {
+							// 	deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, msgID)
+							// 	bot.Send(deleteMsg)
+							// }
+
+							// Send confirmation message
+							msgText = fmt.Sprintf("Filme '%s' salvo com sucesso.", selectedMovie.Title)
 						}
 					}
 				}
 			} else {
-				commands.AddNewMovie(update.Message.Text, &msgText, bot, update.Message.Chat.ID, OMBdMoviesAvailable)
+				commands.AddNewMovie(localText, &msgText, bot, update.Message.Chat.ID, OMBdMoviesAvailable)
 			}
 
 			sendable := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 			bot.Send(sendable)
 
-		case "/filmes":
+		case command == "/filmes":
 			commands.ShowAllMovies(&msgText)
 
 			sendable := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
@@ -100,20 +121,30 @@ func processDirectMentions(msg *tgbotapi.MessageConfig, update *tgbotapi.Update,
 }
 
 func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	isNotAValidInstruction := update.Message.Entities == nil || !update.Message.IsCommand() && !utils.ContainsMention(update.Message.Text, bot.Self.UserName)
-
-	if update.Message == nil || isNotAValidInstruction {
+	if update.Message == nil && update.CallbackQuery == nil {
 		return
+	}
+
+	var chatID int64
+	var messageID int
+	if update.Message != nil {
+		chatID = update.Message.Chat.ID
+		messageID = update.Message.MessageID
+	} else if update.CallbackQuery != nil {
+		chatID = update.CallbackQuery.Message.Chat.ID
+		messageID = update.CallbackQuery.Message.MessageID
 	}
 
 	immediatelyMsg, _ := actions.ImmediatelyReplyUser(bot, *update)
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-	msg.ReplyToMessageID = update.Message.MessageID
+	msg := tgbotapi.NewMessage(chatID, "")
+	msg.ReplyToMessageID = messageID
 
-	if update.Message.IsCommand() {
+	if update.Message != nil && update.Message.IsCommand() {
 		processComamnd(&msg, update, bot)
-	} else if utils.ContainsMention(update.Message.Text, bot.Self.UserName) {
+	} else if update.CallbackQuery != nil {
+		processComamnd(&msg, update, bot)
+	} else if update.Message != nil && utils.ContainsMention(update.Message.Text, bot.Self.UserName) {
 		processDirectMentions(&msg, update, bot)
 	}
 
