@@ -70,6 +70,7 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			}
 			if strings.HasPrefix(choice, "movie_") {
 				index, _ := strconv.Atoi(strings.TrimPrefix(choice, "movie_"))
+				log.Printf("Index: %d", index)
 				if index >= 0 && index < len(OMBdMoviesAvailable) {
 					selectedMovie := OMBdMoviesAvailable[index]
 					err := clients.WriteNewMovie(selectedMovie)
