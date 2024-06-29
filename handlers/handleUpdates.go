@@ -188,13 +188,13 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		processDirectMentions(&msg, update, bot)
 	}
 
-	immediatelyMsg, _ := actions.ImmediatelyReplyUser(bot, chatID, messageID)
-
-	actions.DeleteMessage(immediatelyMsg, bot, chatID)
-
 	if msg.Text == "" {
 		return
 	}
+
+	immediatelyMsg, _ := actions.ImmediatelyReplyUser(bot, chatID, messageID)
+
+	actions.DeleteMessage(immediatelyMsg, bot, chatID)
 
 	utils.AddsUserMention(&msg, userName)
 
