@@ -122,6 +122,9 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			sendable := tgbotapi.NewMessage(chatID, "Estes são os filmes que você tem salvo")
 			bot.Send(sendable)
 
+		case strings.HasPrefix(command, "delete:"):
+			commands.HandleDeleteMovie(bot, update.CallbackQuery)
+
 		default:
 			msgText = fmt.Sprintf("Ainda não sei como fazer %s. Me desculpe 🥹", command)
 		}

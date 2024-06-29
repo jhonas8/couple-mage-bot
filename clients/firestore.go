@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"cloud.google.com/go/firestore"
@@ -23,6 +24,22 @@ func WriteNewMovie(m OMDbMovie) error {
 	return err
 }
 
+func DeleteMovieByIMDbID(imdbID string) error {
+	var results []map[string]interface{}
+
+	if movies, err := readData("movies"); err == nil {
+		for _, r := range movies {
+			if r["imdbID"] == imdbID {
+				results = append(results, r)
+			}
+		}
+	}
+
+	if len(results) == 0 {
+		return fmt.Errorf("movie not found")
+	}
+	return deleteDocument("movies", results[0]["id"].(string))
+}
 func SaveIdsForMovieMessages(chatId int64, savedIds []int, movieTitle string) error {
 	data := map[string]interface{}{
 		"chatId":     chatId,
