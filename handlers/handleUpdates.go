@@ -177,8 +177,6 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		log.Printf("ChatID: %d", chatID)
 	}
 
-	immediatelyMsg, _ := actions.ImmediatelyReplyUser(bot, chatID, messageID)
-
 	msg := tgbotapi.NewMessage(chatID, "")
 	msg.ReplyToMessageID = messageID
 
@@ -189,6 +187,8 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	} else if update.Message != nil && utils.ContainsMention(update.Message.Text, bot.Self.UserName) {
 		processDirectMentions(&msg, update, bot)
 	}
+
+	immediatelyMsg, _ := actions.ImmediatelyReplyUser(bot, chatID, messageID)
 
 	actions.DeleteMessage(immediatelyMsg, bot, chatID)
 
