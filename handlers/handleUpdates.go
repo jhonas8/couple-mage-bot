@@ -9,6 +9,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -25,14 +26,7 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 	var isKnown bool
 	var chatID int64
 
-	if update.Message != nil {
-		command, isKnown = utils.ExtractCommand(update.Message.Text)
-		chatID = update.Message.Chat.ID
-	} else if update.CallbackQuery != nil {
-		command = update.CallbackQuery.Data
-		isKnown = true
-		chatID = update.CallbackQuery.Message.Chat.ID
-	}
+	utils.SetEnvironment(&chatID, &command, &isKnown, update)
 
 	if isKnown {
 		log.Printf("This is the command: %s", command)
@@ -48,14 +42,9 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 		case command == "/novo_filme" || strings.HasPrefix(command, "movie_"):
 			var localText string
 
-			if update.CallbackQuery != nil {
-				localText = update.CallbackQuery.Data
-			} else if update.Message != nil {
-				localText = update.Message.Text
-			}
+			utils.SetLocalText(&localText, update)
 
-			choice := localText
-			if choice == "movie_none" {
+			if localText == "movie_none" {
 				commands.PromptForManualEntry(bot, chatID)
 				return
 			}
@@ -68,17 +57,29 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			if err != nil {
 				msgText = "Ocorreu um erro ao buscar o filme: " + err.Error()
 			}
-			if strings.HasPrefix(choice, "movie_") {
-				index, _ := strconv.Atoi(strings.TrimPrefix(choice, "movie_"))
+
+			if strings.HasPrefix(localText, "movie_") {
+				index_and_title := strings.TrimPrefix(localText, "movie_")
+				index_and_title_parts := strings.Split(index_and_title, "_")
+				index, _ := strconv.Atoi(index_and_title_parts[0])
 				log.Printf("Index: %d", index)
+				log.Printf("Length: %d", len(OMBdMoviesAvailable))
 				if index >= 0 && index < len(OMBdMoviesAvailable) {
 					selectedMovie := OMBdMoviesAvailable[index]
 					log.Printf("Selected movie: %+v", selectedMovie)
 					err := clients.WriteNewMovie(selectedMovie)
 					if err != nil {
+						log.Printf("Error writing new movie: %s", err)
 						msgText = "Ocorreu um erro ao adicionar o filme ao banco de dados: " + err.Error()
 					} else {
 						msgText = fmt.Sprintf("Filme '%s' salvo com sucesso.", selectedMovie.Title)
+						sendable := tgbotapi.NewMessage(chatID, msgText)
+						bot.Send(sendable)
+
+						if selectedMovie.Poster != "N/A" {
+							photoMsg := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(selectedMovie.Poster))
+							bot.Send(photoMsg)
+						}
 					}
 				}
 
@@ -88,6 +89,31 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 
 			sendable := tgbotapi.NewMessage(chatID, msgText)
 			bot.Send(sendable)
+
+			previousMessageIDs, documentIds, _ := clients.GetIdsForMovieMessages(chatID, m.Title)
+			var wg sync.WaitGroup
+			for _, id := range previousMessageIDs {
+				wg.Add(1)
+				go func(id int) {
+					defer wg.Done()
+					deleteMsg := tgbotapi.NewDeleteMessage(chatID, id)
+					_, err := bot.Request(deleteMsg)
+					if err != nil {
+						log.Printf("Error deleting message %d: %v", id, err)
+					}
+				}(id)
+			}
+			wg.Wait()
+
+			var wg2 sync.WaitGroup
+			for _, id := range documentIds {
+				wg2.Add(1)
+				go func(id string) {
+					defer wg2.Done()
+					clients.DeleteSavedIds(chatID, id)
+				}(id)
+			}
+			wg2.Wait()
 
 		case command == "/filmes":
 			commands.ShowAllMovies(&msgText, bot, chatID)

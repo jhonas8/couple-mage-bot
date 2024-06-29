@@ -23,6 +23,42 @@ func WriteNewMovie(m OMDbMovie) error {
 	return err
 }
 
+func SaveIdsForMovieMessages(chatId int64, savedIds []int, movieTitle string) error {
+	data := map[string]interface{}{
+		"chatId":     chatId,
+		"savedIds":   savedIds,
+		"movieTitle": movieTitle,
+	}
+
+	_, err := writeData(data, "movieIds")
+
+	return err
+}
+
+func GetIdsForMovieMessages(chatId int64, movieTitle string) ([]int, []string, error) {
+	results, err := queryData("movieIds", "movieTitle", movieTitle)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var savedIds []int
+	var documentIds []string
+
+	for _, r := range results {
+		if r["chatId"] == chatId {
+			log.Printf("Found result with format %v", r)
+			savedIds = r["savedIds"].([]int)
+			documentIds = append(documentIds, r["id"].(string))
+		}
+	}
+
+	return savedIds, documentIds, nil
+}
+
+func DeleteSavedIds(chatId int64, documentId string) error {
+	return deleteDocument("movieIds", documentId)
+}
+
 func GetAllMovies() []OMDbMovie {
 	results, err := readData("movies")
 
@@ -45,6 +81,15 @@ func GetAllMovies() []OMDbMovie {
 	}
 
 	return movies
+}
+
+func deleteDocument(collection string, documentId string) error {
+	client, ctx := getClient()
+	defer client.Close()
+
+	_, err := client.Collection(collection).Doc(documentId).Delete(*ctx)
+
+	return err
 }
 
 func getClient() (*firestore.Client, *context.Context) {
@@ -84,6 +129,29 @@ func readData(collection string) ([]map[string]interface{}, error) {
 	var results []map[string]interface{}
 
 	iter := client.Collection(collection).Documents(*ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("Error reading the data from collection {%s}: %s", collection, err.Error())
+			return nil, err
+		}
+		results = append(results, doc.Data())
+	}
+
+	return results, nil
+}
+
+func queryData(collection string, field string, value string) ([]map[string]interface{}, error) {
+	client, ctx := getClient()
+	defer client.Close()
+
+	iter := client.Collection(collection).Where(field, "==", value).Documents(*ctx)
+
+	var results []map[string]interface{}
+
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
