@@ -36,6 +36,7 @@ func ShowAllMovies(msgText *string, bot *tgbotapi.BotAPI, chatID int64) {
 		if err != nil {
 			// Handle error (e.g., log it or send a text message instead)
 			textMsg := tgbotapi.NewMessage(chatID, fmt.Sprintf("%s (Poster indisponível)", caption))
+			textMsg.ReplyMarkup = deleteButton
 			message, _ = bot.Send(textMsg)
 		}
 		sentMessageIDs = append(sentMessageIDs, message.MessageID)
