@@ -73,6 +73,7 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 				log.Printf("Index: %d", index)
 				if index >= 0 && index < len(OMBdMoviesAvailable) {
 					selectedMovie := OMBdMoviesAvailable[index]
+					log.Printf("Selected movie: %+v", selectedMovie)
 					err := clients.WriteNewMovie(selectedMovie)
 					if err != nil {
 						msgText = "Ocorreu um erro ao adicionar o filme ao banco de dados: " + err.Error()
