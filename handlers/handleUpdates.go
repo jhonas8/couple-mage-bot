@@ -87,33 +87,34 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 				commands.AddNewMovie(localText, &msgText, bot, chatID, OMBdMoviesAvailable)
 			}
 
-			sendable := tgbotapi.NewMessage(chatID, msgText)
-			bot.Send(sendable)
+			log.Printf("Msg text: %s", msgText)
+			if strings.Contains(msgText, "salvo com sucesso") {
 
-			previousMessageIDs, documentIds, _ := clients.GetIdsForMovieMessages(chatID, m.Title)
-			var wg sync.WaitGroup
-			for _, id := range previousMessageIDs {
-				wg.Add(1)
-				go func(id int) {
-					defer wg.Done()
-					deleteMsg := tgbotapi.NewDeleteMessage(chatID, id)
-					_, err := bot.Request(deleteMsg)
-					if err != nil {
-						log.Printf("Error deleting message %d: %v", id, err)
-					}
-				}(id)
-			}
-			wg.Wait()
+				previousMessageIDs, documentIds, _ := clients.GetIdsForMovieMessages(m.Title)
+				var wg sync.WaitGroup
+				for _, id := range previousMessageIDs {
+					wg.Add(1)
+					go func(id int) {
+						defer wg.Done()
+						deleteMsg := tgbotapi.NewDeleteMessage(chatID, id)
+						_, err := bot.Request(deleteMsg)
+						if err != nil {
+							log.Printf("Error deleting message %d: %v", id, err)
+						}
+					}(id)
+				}
+				wg.Wait()
 
-			var wg2 sync.WaitGroup
-			for _, id := range documentIds {
-				wg2.Add(1)
-				go func(id string) {
-					defer wg2.Done()
-					clients.DeleteSavedIds(chatID, id)
-				}(id)
+				var wg2 sync.WaitGroup
+				for _, id := range documentIds {
+					wg2.Add(1)
+					go func(id string) {
+						defer wg2.Done()
+						clients.DeleteSavedIds(chatID, id)
+					}(id)
+				}
+				wg2.Wait()
 			}
-			wg2.Wait()
 
 		case command == "/filmes":
 			commands.ShowAllMovies(&msgText, bot, chatID)

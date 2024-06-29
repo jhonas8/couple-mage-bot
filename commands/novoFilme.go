@@ -60,7 +60,7 @@ func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int6
 			sentMessageIDs = append(sentMessageIDs, sentMsg.MessageID)
 		}
 
-		title := strings.TrimPrefix(text, "/novo_filme ")
+		title := strings.TrimSpace(strings.TrimPrefix(text, "/novo_filme "))
 
 		// Create keyboard buttons
 		var keyboard [][]tgbotapi.InlineKeyboardButton
@@ -78,7 +78,7 @@ func AddNewMovie(text string, msgText *string, bot *tgbotapi.BotAPI, chatID int6
 		sentSelectionMsg, _ := bot.Send(selectionMsg)
 		sentMessageIDs = append(sentMessageIDs, sentSelectionMsg.MessageID)
 
-		clients.SaveIdsForMovieMessages(chatID, sentMessageIDs, text)
+		clients.SaveIdsForMovieMessages(chatID, sentMessageIDs, title)
 
 		*msgText = "Por favor, selecione o filme correto ou escolha 'Nenhum dos acima'."
 

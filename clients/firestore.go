@@ -35,27 +35,35 @@ func SaveIdsForMovieMessages(chatId int64, savedIds []int, movieTitle string) er
 	return err
 }
 
-func GetIdsForMovieMessages(chatId int64, movieTitle string) ([]int, []string, error) {
-	results, err := queryData("movieIds", "movieTitle", movieTitle)
+func GetIdsForMovieMessages(movieTitle string) ([]int, []string, error) {
+	log.Printf("Getting ids for movie %s", movieTitle)
+	results, err := readData("movieIds")
 	if err != nil {
 		return nil, nil, err
 	}
+
+	log.Printf("Results: %v", results)
 
 	var savedIds []int
 	var documentIds []string
 
 	for _, r := range results {
-		if r["chatId"] == chatId {
-			log.Printf("Found result with format %v", r)
-			savedIds = r["savedIds"].([]int)
-			documentIds = append(documentIds, r["id"].(string))
+		log.Printf("Found result with format %v", r)
+		savedIdsInterface := r["savedIds"].([]interface{})
+		for _, id := range savedIdsInterface {
+			savedIds = append(savedIds, int(id.(int64)))
 		}
+		documentIds = append(documentIds, r["id"].(string))
 	}
+
+	log.Printf("Saved ids: %v", savedIds)
+	log.Printf("Document ids: %v", documentIds)
 
 	return savedIds, documentIds, nil
 }
 
 func DeleteSavedIds(chatId int64, documentId string) error {
+	log.Printf("Deleting document with id %s", documentId)
 	return deleteDocument("movieIds", documentId)
 }
 
@@ -138,7 +146,9 @@ func readData(collection string) ([]map[string]interface{}, error) {
 			log.Printf("Error reading the data from collection {%s}: %s", collection, err.Error())
 			return nil, err
 		}
-		results = append(results, doc.Data())
+		data := doc.Data()
+		data["id"] = doc.Ref.ID
+		results = append(results, data)
 	}
 
 	return results, nil
@@ -161,7 +171,10 @@ func queryData(collection string, field string, value string) ([]map[string]inte
 			log.Printf("Error reading the data from collection {%s}: %s", collection, err.Error())
 			return nil, err
 		}
-		results = append(results, doc.Data())
+
+		data := doc.Data()
+		data["id"] = doc.Ref.ID
+		results = append(results, data)
 	}
 
 	return results, nil
