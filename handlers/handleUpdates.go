@@ -90,9 +90,9 @@ func processComamnd(msg *tgbotapi.MessageConfig, update *tgbotapi.Update, bot *t
 			bot.Send(sendable)
 
 		case command == "/filmes":
-			commands.ShowAllMovies(&msgText)
+			commands.ShowAllMovies(&msgText, bot, chatID)
 
-			sendable := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+			sendable := tgbotapi.NewMessage(chatID, "Estes são os filmes que você tem salvo")
 			bot.Send(sendable)
 
 		default:
