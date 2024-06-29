@@ -130,13 +130,17 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	var chatID int64
 	var messageID int
+	var userName string
+
 	if update.Message != nil {
 		chatID = update.Message.Chat.ID
 		messageID = update.Message.MessageID
+		userName = update.Message.From.UserName
 	} else if update.CallbackQuery != nil {
 		log.Printf("CallbackQuery: %+v", update.CallbackQuery)
 		chatID = update.CallbackQuery.Message.Chat.ID
 		messageID = update.CallbackQuery.Message.MessageID
+		userName = update.CallbackQuery.From.UserName
 		log.Printf("MessageID: %d", messageID)
 		log.Printf("ChatID: %d", chatID)
 	}
@@ -154,13 +158,13 @@ func HandleUpdate(update *tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		processDirectMentions(&msg, update, bot)
 	}
 
+	actions.DeleteMessage(immediatelyMsg, bot, chatID)
+
 	if msg.Text == "" {
 		return
 	}
 
-	utils.AddsUserMention(&msg, update.Message.From.UserName)
-
-	actions.DeleteMessage(immediatelyMsg, bot, update.Message.Chat.ID)
+	utils.AddsUserMention(&msg, userName)
 
 	msgSent, errorSending := bot.Send(msg)
 
